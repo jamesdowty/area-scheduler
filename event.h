@@ -3,21 +3,11 @@
 
 #include <string>
 
-class event
+struct event
 {
-public:
-    void setName(string &newName) {name = newName;};
-    void setEmployee(string &newEmployee) {employee = newEmployee;};
-    void setMin(int newMin) {min = newMin;};
-    void setMax(int newMax) {max = newMax;};
-    
-    string getName() {return name;};
-    string getEmployee() {return employee;};
-    short getMin() {return min;};
-    short getMax() {return max;};
-private:
+    eventCatagory event;
     string name;
-    string employee;
+    employee *emp = NULL;
     short min;
     short max;
 };

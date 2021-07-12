@@ -2,25 +2,18 @@
 #define EMPLOYEE_H
 
 #include <string>
+#include "area.h"
 
-class employee
+using namespace std;
+
+struct employee
 {
-public:
-    void setName(string &newName) {name = newName;};
-    void setId(string &newId) {id = newId;};
-    void setStart(int newStart) {start = newStart;};
-    void setEnd(int newEnd) {end = newEnd;};
-    
-    string getName() {return name;};
-    string getId() {return id;};
-    short getStart() {return start;};
-    short getEnd() {return end;};
-
-private:
     string name;
     string id;
     short start;
     short end;
+    //eventCatagory status;
+    area currentArea;
 };
 
 #endif
