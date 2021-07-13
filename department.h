@@ -9,6 +9,7 @@
 #include <queue>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -32,10 +33,22 @@ private:
     int toMinutes(string);
 };
 
+int department::toMinutes(string in)
+{
+    int result;
+    stringstream s(in);
+    string hours;
+    string minutes;
+    getline(s, hours, ':');
+    getline(s, minutes);
+    result = stoi(hours) * 60;
+    result += stoi(minutes);
+    return result;
+};
+
 void department::importData(string areasPath, string breaksPath, string employeesPath)
 {
-    string title, startTime, endTime, maxConcecutive, maxTotal, duration;
-    int min, max;
+    string title, startTime, endTime, maxConcecutive, maxTotal, duration, min, max;
     char paid;
     
     ifstream inputFile;
@@ -70,20 +83,24 @@ void department::importData(string areasPath, string breaksPath, string employee
         inputFile.ignore(10000, '\n');
         inputFile.get(paid);
 
-        breaks.push_back(title, toMinutes(duration), toMinutes(min), toMinutes(max), paid == 'y' || paid == 'Y');
+        breaks.push_back(rest(title, toMinutes(duration), toMinutes(min), toMinutes(max), paid == 'y' || paid == 'Y'));
     }
 
     inputFile.close();
 
     //EMPLOYEES INPUT FILE
     inputFile.open(employeesPath);
-/*
+
     while(!inputFile.eof())
     {
+        string n, id, s, e; //name, employee id, start time, end time
+        getline(inputFile, n);
+        getline(inputFile, id);
+        getline(inputFile, s);
+        getline(inputFile, e);
 
+        employees[id] = employee(n, id, toMinutes(s), toMinutes(e));
     }
-*/
-
     inputFile.close();
     return;
 };

@@ -1,6 +1,10 @@
 #ifndef REST_H
 #define REST_H
 
+#include <string>
+
+using namespace std;
+
 class rest
 {
 public:
