@@ -5,7 +5,7 @@
 
 struct event
 {
-    eventCatagory event;
+    //eventCatagory event;
     string name;
     employee *emp = NULL;
     short min;

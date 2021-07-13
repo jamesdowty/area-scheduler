@@ -5,6 +5,8 @@
 #include <fstream>
 #include <vector>
 
+using namespace std;
+
 class area
 {
 public:
@@ -14,8 +16,8 @@ public:
     void setMaxEmployees(int newMax) {maxEmployees = newMax;};
     
     string getName() {return name;};
-    short getMinEmployees {return minEmployees;};
-    short getMaxEmployees {return maxEmployees;};
+    short getMinEmployees() {return minEmployees;};
+    short getMaxEmployees() {return maxEmployees;};
 private:
     string name;
     short minEmployees;

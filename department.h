@@ -29,32 +29,62 @@ private:
     int maxTotalTime;
     int parkOpen;
     int parkClose;
+    int toMinutes(string);
 };
 
 void department::importData(string areasPath, string breaksPath, string employeesPath)
 {
-    ifstream areasFile;
-    areasFile.open(areasPath, ios::in);
-    while(!areasFile.eof())
-    {
-        string title;
-        int min, max;
-        getline(areasFile, title);
-        areasFile >> min >> max;
+    string title, startTime, endTime, maxConcecutive, maxTotal, duration;
+    int min, max;
+    char paid;
+    
+    ifstream inputFile;
 
+    //AREAS INPUT FILE
+    inputFile.open(areasPath);
+    while(!inputFile.eof())
+    {
+        int min, max;
+        getline(inputFile, title);
+        inputFile >> min;
+        inputFile >> max;
+        inputFile.ignore(10000, '\n');
         areas.push_back(area(title, min, max));
     }
+    inputFile.close();
 
-    areasFile.close();
+    //BREAKS INPUT FILE
+    inputFile.open(breaksPath);
 
-    for(auto x : areas)
+    inputFile >> maxConcecutive;
+    inputFile >> maxTotal;
+    maxConcecutiveTime = toMinutes(maxConcecutive);
+    maxTotalTime = toMinutes(maxTotal);
+
+    while(!inputFile.eof())
     {
-        cout << "Name: " << x.getName();
-        cout << "\nMin Employees: " << x.getMinEmployees();
-        cout << "\nMax Employees: " << x.getMaxEmployees();
-        cout << endl << endl;
+        getline(inputFile, title);
+        getline(inputFile, duration);
+        getline(inputFile, min);
+        getline(inputFile, max);
+        inputFile.ignore(10000, '\n');
+        inputFile.get(paid);
+
+        breaks.push_back(title, toMinutes(duration), toMinutes(min), toMinutes(max), paid == 'y' || paid == 'Y');
     }
 
+    inputFile.close();
+
+    //EMPLOYEES INPUT FILE
+    inputFile.open(employeesPath);
+/*
+    while(!inputFile.eof())
+    {
+
+    }
+*/
+
+    inputFile.close();
     return;
 };
 
