@@ -3,7 +3,6 @@
 
 #include "employee.h"
 #include "area.h"
-#include "event.h"
 #include "rest.h"
 #include <unordered_map>
 #include <queue>
@@ -19,7 +18,7 @@ public:
     void importData(string, string, string);
     
 private:
-    unordered_map<string, employee> employees;
+    vector<employee> employees;
     vector<area> areas;
     queue<employee> availableEmployees;
     //priority_queue<event> startTimes;
@@ -40,6 +39,7 @@ int department::toMinutes(string in)
     string hours;
     string minutes;
     getline(s, hours, ':');
+    cout << hours;
     getline(s, minutes);
     result = stoi(hours) * 60;
     result += stoi(minutes);
@@ -99,9 +99,43 @@ void department::importData(string areasPath, string breaksPath, string employee
         getline(inputFile, s);
         getline(inputFile, e);
 
-        employees[id] = employee(n, id, toMinutes(s), toMinutes(e));
+        employees.push_back(employee(n, id, toMinutes(s), toMinutes(e)));
     }
     inputFile.close();
+
+    /****************************************
+     * PRINTING RESULTS FOR TEST
+     * *************************************/
+    cout << "__________AREAS__________\n";
+
+    for(auto x : areas)
+    {
+        cout << "Name: " << x.getName() << endl;
+        cout << "Min:  " << x.getMinEmployees() << endl;
+        cout << "Max:  " << x.getMaxEmployees() << endl;
+        cout << "Curr: " << x.getCurEmployees() << endl << endl;
+    }
+
+    cout << "\n__________BREAKS__________\n";
+
+    for(auto x : breaks)
+    {
+        cout << "Name: " << x.getName() << endl;
+        cout << "Duration: " << x.getDuration() << endl;
+        cout << "Min Start: " << x.getMinStart() << endl;
+        cout << "Max Start: " << x.getMaxStart() << endl;
+    }
+
+    cout << "\n__________EMPLOYEES__________\n";
+
+    for(auto x : employees)
+    {
+        cout << "Name: " << x.getName() << endl;
+        cout << "ID: " << x.getId() << endl;
+        cout << "Start: " << x.getStart() << endl;
+        cout << "End: " << x.getEnd() << endl;
+    }
+
     return;
 };
 

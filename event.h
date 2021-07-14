@@ -2,11 +2,10 @@
 #define EVENT_H
 
 #include "employee.h"
+#include "eventCatagory.h"
 #include <string>
 
 using namespace std;
-
-enum eventCatagory {START, END, REST, GAME, OFF};
 
 struct event
 {

@@ -16,6 +16,7 @@ public:
     string getName() {return name;};
     short getMinEmployees() {return minEmployees;};
     short getMaxEmployees() {return maxEmployees;};
+    short getCurEmployees() {return curEmployees;};
 private:
     string name;
     short minEmployees;

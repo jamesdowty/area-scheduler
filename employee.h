@@ -3,7 +3,7 @@
 
 #include <string>
 #include "area.h"
-#include "event.h"
+#include "eventCatagory.h"
 
 using namespace std;
 
@@ -12,6 +12,13 @@ class employee
 public:
     employee() {};
     employee(string, string, short, short, eventCatagory, area*);
+    string getName() {return name;};
+    string getId() {return id;};
+    short getStart() {return start;};
+    short getEnd() {return end;};
+    eventCatagory getStatus(){return status;};
+    area* getCurrentArea() {return currentArea;};
+
 private:
     string name;
     string id;

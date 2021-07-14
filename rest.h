@@ -9,6 +9,10 @@ class rest
 {
 public:
     rest(string, int, int, int, bool);
+    string getName() {return name;};
+    int getDuration() {return duration;};
+    int getMinStart() {return minStart;};
+    int getMaxStart() {return maxStart;};
 private:
     string name;
     int duration;
