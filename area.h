@@ -2,6 +2,7 @@
 #define AREA_H
 
 #include <string>
+#include "employee.h"
 
 using namespace std;
 
@@ -12,6 +13,8 @@ public:
     void setName(string &newName) {name = newName;};
     void setMinEmployees(int newMin) {minEmployees = newMin;};
     void setMaxEmployees(int newMax) {maxEmployees = newMax;};
+    void removeEmployee();
+    void addEmployee();
     
     string getName() {return name;};
     short getMinEmployees() {return minEmployees;};
@@ -31,5 +34,15 @@ area::area(string newName, short newMin, short newMax)
     maxEmployees = newMax;
     curEmployees = 0;
 };
+
+void area::removeEmployee()
+{
+    curEmployees--;
+}
+
+void area::addEmployee()
+{
+    curEmployees++;
+}
 
 #endif
