@@ -7,7 +7,7 @@ int main()
 {
     department d;
     d.importData("areas.dat", "breaks.dat", "employees.dat");
-    d.createSchedule();
+    //d.createSchedule();
 
     return 0;
 }

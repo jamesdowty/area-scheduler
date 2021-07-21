@@ -2,6 +2,7 @@
 #define EMPLOYEE_H
 
 #include <string>
+#include <iostream>
 #include "area.h"
 #include "eventCatagory.h"
 
@@ -11,17 +12,17 @@ class employee
 {
 public:
     employee() {};
-    employee(string, string, short, short, eventCatagory, area*);
-    string getName() {return name;};
-    string getId() {return id;};
-    short getStart() {return start;};
-    short getEnd() {return end;};
-    short getNextRest() {return nextRest;};
-    eventCatagory getStatus(){return status;};
-    area* getCurrentArea() {return currentArea;};
-    void setCurrentArea(area *n) {currentArea = n;};
-    void setStatus(eventCatagory x){status = x;};
-    void incrementBreak(){nextRest++;};
+    employee(string, string, int, int);
+    string getName();
+    string getId();
+    short getStart();
+    short getEnd();
+    short getNextRest();
+    eventCatagory getStatus();
+    area* getCurrentArea();
+    void setCurrentArea(area *n);
+    void setStatus(eventCatagory x);
+    void incrementBreak();
 
 private:
     string name;
@@ -31,17 +32,6 @@ private:
     short nextRest;
     eventCatagory status;
     area *currentArea;
-};
-
-employee::employee(string n, string i, short s, short e, eventCatagory x = OFF, area *a = NULL)
-{
-    name = n;
-    id = i;
-    start = s;
-    end = e;
-    status = x;
-    currentArea = a;
-    nextRest = 0;
 };
 
 #endif
