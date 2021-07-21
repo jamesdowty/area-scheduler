@@ -170,43 +170,56 @@ void department::createSchedule()
 
 void department::updateStartTimes() //Moves employees starting at current time to availableEmployees, updates violations
 {
-    event tempEvent = startTimes.top();  //The soonest start time for the next employee
+    event nextStart = startTimes.top();  //The soonest start time for the next employee
 
-    while(startTimes.size() > 0 && tempEvent.getMin() <= currentTime)  //While there are employees starting at the current time
+    while(startTimes.size() > 0 && nextStart.getMin() <= currentTime)  //While there are employees starting at the current time
     {
-        //The employee starting the soonest
-        employee &tempEmployee = employees[tempEvent.getEmp()];
-        startTimes.pop(); 
+        startTimes.pop();
 
-        //If the next employee starting has not taken their last break and ends their shift after the next violation, then push their next violation into the violations vector.
-        if(tempEmployee.getNextRest() < breaks.size() && breaks[tempEmployee.getNextRest()].getMaxStart() + tempEmployee.getStart() < tempEmployee.getEnd())
-            violations.push_back(event(REST, tempEvent.getEmp(), breaks[tempEmployee.getNextRest()].getMinStart() + currentTime, breaks[tempEmployee.getNextRest()].getMaxStart() + tempEmployee.getStart()));
+        //The employee starting the soonest
+        int       nextEmployeeIndex = nextStart.getEmp();
+        employee &nextEmployee      = employees[nextEmployeeIndex];
+        int       nextRestIndex     = nextEmployee.getNextRest();
+
+        //If the next employee starting has not taken their last break and ends their
+        //shift after the next violation, then push their next violation into the violations vector.
+        if(nextRestIndex < breaks.size() && breaks[nextRestIndex].getMaxStart() + nextEmployee.getStart() < nextEmployee.getEnd())
+        {
+            violations.push_back(event(REST, nextEmployeeIndex, breaks[nextRestIndex].getMinStart() + currentTime,
+                                       breaks[nextRestIndex].getMaxStart() + nextEmployee.getStart()));
+        }
 
         //Add the employee to the queue of available employees
-        availableEmployees.push(&tempEmployee);
+        availableEmployees.push(nextEmployeeIndex);
 
         //Update next start time for exit condition
-        tempEvent = startTimes.top();
+        nextStart = startTimes.top();
     }
 
     //Sort the violations vector in order so that the soonest min time is first
     sort(violations.begin(), violations.end(), [](event &a, event &b) -> bool {return a.getMin() < b.getMin();});
 };
 
-void department::updateEndTimes() //Removes employees if their shift is ending at the current time by closing their game, or moving another employee from a lower ranked game if available.
+void department::updateEndTimes() //Removes employees if their shift is ending at the current time by closing their game
+                                  //or moving another employee from a lower ranked game if available.
 {
-    while(endTimes.size() > 0 && endTimes.top().getMin() == currentTime) //While at least one employee's shift is ending at the current time
+    event nextEndTime = endTimes.top();
+    employee &endingEmp = employees[nextEndTime.getEmp()];
+
+    while(endTimes.size() > 0 && nextEndTime.getMin() == currentTime) //While at least one employee's shift is ending at the current time
     {
-        event nextEndTime = endTimes.top();
         endTimes.pop();
+
         if(availableEmployees.size() > 0)  //If there are available employees, swap for the employees ending their shift
         {
-            string newStep = "@" + to_string(currentTime) + " INSERT " + availableEmployees.front()->getName() + " into " +
-                             nextEndTime.getEmp()->getCurrentArea()->getName() + " for " + nextEndTime.getEmp()->getName() + " to end shift";
-            steps.push_back(step(currentTime, INSERT, newStep, availableEmployees.front(), nextEndTime.getEmp()->getCurrentArea()));
-            availableEmployees.front()->setStatus(AREA);
-            availableEmployees.front()->setCurrentArea(nextEndTime.getEmp()->getCurrentArea());
+            int nextEmpIndex = availableEmployees.front();
             availableEmployees.pop();
+            employee &nextEmp = employees[nextEmpIndex];
+            string newStep = "@" + to_string(currentTime) + " INSERT " + nextEmp.getName() + " into " +
+                             endingEmp.getCurrentArea()->getName() + " for " + endingEmp.getName() + " to end shift";
+            steps.push_back(step(currentTime, INSERT, newStep, availableEmployees.front(), employees[nextEndTime.getEmp()].getCurrentArea()));
+            nextEmp.setStatus(AREA);
+            nextEmp.setCurrentArea(nextEndTime.getEmp()->getCurrentArea());
         }
         else //Else, try and find someone else to replace them
         {
@@ -237,6 +250,8 @@ void department::updateEndTimes() //Removes employees if their shift is ending a
         //Employee has no area and is off
         nextEndTime.getEmp()->setStatus(OFF);
         nextEndTime.getEmp()->setCurrentArea(NULL);
+
+        nextEndTime = endTimes.top();
     }
 
 };

@@ -6,7 +6,7 @@ using namespace std;
 int main()
 {
     department d;
-    d.importData("areas.dat", "breaks.dat", "employees.dat");
+    d.importData("Data\areas.dat", "Data\breaks.dat", "Data\employees.dat");
     //d.createSchedule();
 
     return 0;
