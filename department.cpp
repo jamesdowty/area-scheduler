@@ -219,23 +219,25 @@ void department::updateEndTimes() //Removes employees if their shift is ending a
                              endingEmp.getCurrentArea()->getName() + " for " + endingEmp.getName() + " to end shift";
             steps.push_back(step(currentTime, INSERT, newStep, availableEmployees.front(), employees[nextEndTime.getEmp()].getCurrentArea()));
             nextEmp.setStatus(AREA);
-            nextEmp.setCurrentArea(nextEndTime.getEmp()->getCurrentArea());
+            nextEmp.setCurrentArea(endingEmp.getCurrentArea());
         }
         else //Else, try and find someone else to replace them
         {
-            employee *nextEmp = findNextEmployee(); //If no employees found, error
-            if(!nextEmp)
-                cout << "Unknown error, CODE 1\n";
-            else if(nextEmp->getCurrentArea() != nextEndTime.getEmp()->getCurrentArea()) //If another employee can cover
-            {
-                string newStep = "@" + to_string(currentTime) + " MOVE " + nextEmp->getName() + " from " + nextEmp->getCurrentArea()->getName()
-                                 + " to " + nextEndTime.getEmp()->getCurrentArea()->getName() + " to let out " + nextEndTime.getEmp()->getName() + " for END OF SHIFT";
-                nextEmp->getCurrentArea()->removeEmployee();
-                if(nextEmp->getCurrentArea()->getCurEmployees() < 1)
-                    newStep += ", close " + nextEmp->getCurrentArea()->getName();
+            int nextEmpIndex = findNextEmployee(); //If no employees found, error
+            employee &nextEmp = employees[nextEmpIndex];
 
-                steps.push_back(step(currentTime, MOVE, newStep, nextEmp, nextEndTime.getEmp()->getCurrentArea(), nextEndTime.getEmp(), nextEmp->getCurrentArea()));
-                nextEmp->setCurrentArea(nextEndTime.getEmp()->getCurrentArea());
+            if(nextEmpIndex == -1)
+                cout << "Unknown error, CODE 1\n";
+            else if(nextEmp.getCurrentArea() != endingEmp.getCurrentArea()) //If another employee can cover
+            {
+                string newStep = "@" + to_string(currentTime) + " MOVE " + nextEmp.getName() + " from " + areas[nextEmp.getCurrentArea()].getName()
+                                 + " to " + areas[endingEmp.getCurrentArea()].getName() + " to let out " + endingEmp.getName() + " for END OF SHIFT";
+                areas[nextEmp.getCurrentArea()]--;
+                if(areas[nextEmp.getCurrentArea()].getCurEmployees() < 1)
+                    newStep += ", close " + areas[nextEmp.getCurrentArea()].getName();
+
+                steps.push_back(step(currentTime, MOVE, newStep, nextEmp, endingEmp.getCurrentArea(), nextEndTime.getEmp(), nextEmp.getCurrentArea()));
+                nextEmp.setCurrentArea(endingEmp.getCurrentArea());
             }
             else // If no employee can cover
             {
