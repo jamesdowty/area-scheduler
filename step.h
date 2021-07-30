@@ -12,20 +12,20 @@ using namespace std;
 class step
 {
 public:
-    step(int, STEP_TYPE, string, employee*, area*, employee*, area*);
-    step(int, STEP_TYPE, string, employee*, area*, employee*);
-    step(int, STEP_TYPE, string, employee*, area*);
+    step(int, STEP_TYPE, string, int, int, int, int);
+    step(int, STEP_TYPE, string, int, int, int);
+    step(int, STEP_TYPE, string, int, int);
     int getTime() const;
     void printMessage();
     bool operator<(const step &x);
 private:
     int time;
     STEP_TYPE stepType;
-    employee *employeeIn;
-    employee *employeeOut;
-    area     *where;
-    area     *whereFrom;
-    string   message;
+    int       employeeIn;
+    int       employeeOut;
+    int       where;
+    int       whereFrom;
+    string    message;
 };
 
 #endif

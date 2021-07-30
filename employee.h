@@ -19,8 +19,8 @@ public:
     short getEnd();
     short getNextRest();
     eventCatagory getStatus();
-    area* getCurrentArea();
-    void setCurrentArea(area *n);
+    int getCurrentArea();
+    void setCurrentArea(int n);
     void setStatus(eventCatagory x);
     void incrementBreak();
 
@@ -31,7 +31,7 @@ private:
     short end;
     short nextRest;
     eventCatagory status;
-    area *currentArea;
+    int currentArea;
 };
 
 #endif

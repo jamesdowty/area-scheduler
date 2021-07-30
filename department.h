@@ -68,7 +68,8 @@ private:
     void      updateViolations();
     void      updateEndTimes();
     void      fillAreas();
-    employee* findNextEmployee();
+    int       findNextEmployee();
+    int       miscEmployees = 0;
 };
 
 #endif

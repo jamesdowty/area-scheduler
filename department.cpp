@@ -22,7 +22,6 @@ void department::importData(string areasPath, string breaksPath, string employee
     char paid;
     
     ifstream inputFile;
-
     /********************
      * INPUT AREAS FILE *
      ********************/
@@ -31,13 +30,11 @@ void department::importData(string areasPath, string breaksPath, string employee
     {
         int max;
         getline(inputFile, title);
-        inputFile.ignore(10000, '\n');
         inputFile >> max;
         inputFile.ignore(10000, '\n');
         areas.push_back(area(title, max));
     }
     inputFile.close();
-
     /*********************
      * INPUT BREAKS FILE *
      *********************/
@@ -61,7 +58,6 @@ void department::importData(string areasPath, string breaksPath, string employee
     }
 
     inputFile.close();
-
     /************************
      * INPUT EMPLOYEES FILE *
      ************************/
@@ -85,10 +81,10 @@ void department::importData(string areasPath, string breaksPath, string employee
 
     inputFile.close();
 
-/*
     //***********************************
     //* JUST FOR TESTING
     //* *********************************
+    /*
     cout << "__________AREAS__________\n";
     for(int i = 0; i < areas.size(); i++)
     {
@@ -119,7 +115,7 @@ void department::importData(string areasPath, string breaksPath, string employee
         cout << endl;
     }
 
-*/
+
 
     cout << "__________START TIMES__________\n";
     while(startTimes.size() > 0)
@@ -140,7 +136,7 @@ void department::importData(string areasPath, string breaksPath, string employee
         cout << "Employee Id: " << employees[curEnd.getEmp()].getId() << endl;
         cout << "End Time: " << curEnd.getMin() << endl << endl;
     }
-
+*/
     return;
 };
 
@@ -152,20 +148,19 @@ void department::createSchedule()
         //Update availablility (startTimes)
         updateStartTimes();
         //Take care of shifts ending
-        //updateEndTimes();
+        updateEndTimes();
         //Take care of violations
-        //updateViolations();
+        updateViolations();
         //Use the rest of the employees to fill open games in order of priority
-        //fillAreas();
+        fillAreas();
         currentTime++;
     }
-    //sort(steps.begin(), steps.end());
-
-    //for(auto x : steps)
-    //{
-    //    x.printMessage();
-    //    cout << endl;
-    //}
+    sort(steps.begin(), steps.end());
+    for(auto x : steps)
+    {
+        x.printMessage();
+        cout << endl;
+    }
 };
 
 void department::updateStartTimes() //Moves employees starting at current time to availableEmployees, updates violations
@@ -200,101 +195,74 @@ void department::updateStartTimes() //Moves employees starting at current time t
     sort(violations.begin(), violations.end(), [](event &a, event &b) -> bool {return a.getMin() < b.getMin();});
 };
 
-void department::updateEndTimes() //Removes employees if their shift is ending at the current time by closing their game
-                                  //or moving another employee from a lower ranked game if available.
+void department::updateEndTimes() //Removes employees if their shift is ending at the current time by closing their game or moving another employee from a lower ranked game if available.
 {
-    event nextEndTime = endTimes.top();
-    employee &endingEmp = employees[nextEndTime.getEmp()];
-
-    while(endTimes.size() > 0 && nextEndTime.getMin() == currentTime) //While at least one employee's shift is ending at the current time
+    while(endTimes.size() > 0 && endTimes.top().getMin() == currentTime) //While at least one employee's shift is ending at the current time
     {
+        event nextEndTime = endTimes.top();
         endTimes.pop();
+        int endingEmpIndex = nextEndTime.getEmp();
+        employee &endingEmp = employees[endingEmpIndex];
+        int endingAreaIndex = endingEmp.getCurrentArea();
+        area &endingArea = areas[endingAreaIndex];
 
         if(availableEmployees.size() > 0)  //If there are available employees, swap for the employees ending their shift
         {
             int nextEmpIndex = availableEmployees.front();
-            availableEmployees.pop();
             employee &nextEmp = employees[nextEmpIndex];
+            availableEmployees.pop();
+
             string newStep = "@" + to_string(currentTime) + " INSERT " + nextEmp.getName() + " into " +
-                             endingEmp.getCurrentArea()->getName() + " for " + endingEmp.getName() + " to end shift";
+                             endingArea.getName() + " for " + endingEmp.getName() + " to end shift";
             steps.push_back(step(currentTime, INSERT, newStep, availableEmployees.front(), employees[nextEndTime.getEmp()].getCurrentArea()));
             nextEmp.setStatus(AREA);
-            nextEmp.setCurrentArea(endingEmp.getCurrentArea());
+            nextEmp.setCurrentArea(endingAreaIndex);
         }
         else //Else, try and find someone else to replace them
         {
             int nextEmpIndex = findNextEmployee(); //If no employees found, error
             employee &nextEmp = employees[nextEmpIndex];
-
             if(nextEmpIndex == -1)
                 cout << "Unknown error, CODE 1\n";
-            else if(nextEmp.getCurrentArea() != endingEmp.getCurrentArea()) //If another employee can cover
+
+            else if(nextEmp.getCurrentArea() != endingAreaIndex && nextEmp.getEnd() != endingEmp.getEnd()) //If another employee can cover
             {
                 string newStep = "@" + to_string(currentTime) + " MOVE " + nextEmp.getName() + " from " + areas[nextEmp.getCurrentArea()].getName()
-                                 + " to " + areas[endingEmp.getCurrentArea()].getName() + " to let out " + endingEmp.getName() + " for END OF SHIFT";
-                areas[nextEmp.getCurrentArea()]--;
+                                 + " to " + areas[endingAreaIndex].getName() + " to let out " + endingEmp.getName() + " for END OF SHIFT";
+                --areas[nextEmp.getCurrentArea()];
                 if(areas[nextEmp.getCurrentArea()].getCurEmployees() < 1)
                     newStep += ", close " + areas[nextEmp.getCurrentArea()].getName();
-
-                steps.push_back(step(currentTime, MOVE, newStep, nextEmp, endingEmp.getCurrentArea(), nextEndTime.getEmp(), nextEmp.getCurrentArea()));
-                nextEmp.setCurrentArea(endingEmp.getCurrentArea());
+                steps.push_back(step(currentTime, MOVE, newStep, nextEmpIndex, endingAreaIndex, nextEndTime.getEmp(), nextEmp.getCurrentArea()));
+                nextEmp.setCurrentArea(endingAreaIndex);
             }
+
             else // If no employee can cover
             {
-                string newStep = "@" + to_string(currentTime) + " REMOVE " + nextEndTime.getEmp()->getName() + " from " + nextEndTime.getEmp()->getCurrentArea()->getName()
+                string stepString = "@" + to_string(currentTime) + " REMOVE " + nextEmp.getName() + " from " + endingArea.getName()
                                  + " for END OF SHIFT";
-                nextEndTime.getEmp()->getCurrentArea()->removeEmployee();
-                if(nextEndTime.getEmp()->getCurrentArea()->getCurEmployees() < 1)
-                    newStep += ", close " + nextEndTime.getEmp()->getCurrentArea()->getName();                
+                --endingArea;
+                if(endingArea.getCurEmployees() < 1)
+                    stepString += ", close " + endingArea.getName(); 
+
+                steps.push_back(step(currentTime, REMOVE, stepString, endingEmpIndex, endingAreaIndex));             
             }
         }
-
         //Employee has no area and is off
-        nextEndTime.getEmp()->setStatus(OFF);
-        nextEndTime.getEmp()->setCurrentArea(NULL);
-
-        nextEndTime = endTimes.top();
+        endingEmp.setStatus(OFF);
+        endingEmp.setCurrentArea(-1);
     }
 
 };
 
 void department::updateViolations()
 {
-    while(violations.size() > 0 && violations[0].getMin() <= currentTime)
-    {
-        if(availableEmployees.size() > 0)
-        {
-            string newStep = "@" + to_string(currentTime) + " SWAP " + availableEmployees.front()->getName() + " into " + violations[0].getEmp()->getCurrentArea()->getName() +
-                            " for " + violations[0].getEmp()->getName() + "\'s " + breaks[violations[0].getEmp()->getNextRest()].getName();
-            steps.push_back(step(currentTime, SWAP, newStep, availableEmployees.front(), violations[0].getEmp()->getCurrentArea(), violations[0].getEmp()));
-
-            availableEmployees.front()->setStatus(AREA);
-            availableEmployees.front()->setCurrentArea(violations[0].getEmp()->getCurrentArea());
-            availableEmployees.pop();
-        }
-        else
-        {
-            string newStep = "@" + to_string(currentTime) + " REMOVE " + violations[0].getEmp()->getName() + " from " +
-                             violations[0].getEmp()->getCurrentArea()->getName() + " for " + breaks[violations[0].getEmp()->getNextRest()].getName();
-            steps.push_back(step(currentTime, REMOVE, newStep, violations[0].getEmp(), violations[0].getEmp()->getCurrentArea()));
-            violations[0].getEmp()->getCurrentArea()->removeEmployee(); //ERROR HERE
-        }
-
-        violations[0].getEmp()->setStatus(REST);
-        violations[0].getEmp()->setCurrentArea(NULL);
-        startTimes.push(event(START, violations[0].getEmp(), currentTime + breaks[violations[0].getEmp()->getNextRest()].getDuration(),
-                              currentTime + breaks[violations[0].getEmp()->getNextRest()].getDuration()));
-
-        violations[0].getEmp()->incrementBreak();
-
-        violations.erase(violations.begin());
-    }
 
 };
 
 void department::fillAreas()
 {
     bool filled = false;
+    int  empsPerArea = 1;
     while(!filled && availableEmployees.size() > 0)
     {
         filled = true;
@@ -303,53 +271,83 @@ void department::fillAreas()
             if(areas[i].getCurEmployees() < areas[i].getMaxEmployees())
             {
                 filled = false;
-                if(availableEmployees.size() > 0)
+                if(areas[i].getCurEmployees() < empsPerArea && availableEmployees.size() > 0)
                 {
-                    string newStep = "@" + to_string(currentTime) + " INSERT " + availableEmployees.front()->getName() + " into " + areas[i].getName(); //ERROR HERE
-                    steps.push_back(step(currentTime, INSERT, newStep, availableEmployees.front(), &areas[i]));
-                    areas[i].addEmployee();
-                    availableEmployees.front()->setStatus(AREA);
-                    availableEmployees.front()->setCurrentArea(&areas[i]);
+                    int nextEmployeeIndex = availableEmployees.front();
+                    employee &nextEmployee = employees[nextEmployeeIndex];
                     availableEmployees.pop();
+                    string stepString = "@" + to_string(currentTime) + " INSERT " + nextEmployee.getName() + " into " + areas[i].getName();
+                    steps.push_back(step(currentTime, INSERT, stepString, nextEmployeeIndex, i));
+
+                    nextEmployee.setStatus(AREA);
+                    nextEmployee.setCurrentArea(i);
+                    ++areas[i];
                 }
             }
         }
+
+        ++empsPerArea;
     }
 };
 
-employee* department::findNextEmployee() //Find the next currently working employee to cover for a leaving employee
+int department::findNextEmployee() //Find the next currently working employee to cover for a leaving employee
 {
     if(areas.size() > 0 && areas[areas.size() - 1].getCurEmployees() == 0) //If not all games are filled, find the employee at the lowest ranked game
-        for(int i = areas.size() - 1; i >=0; i--)
-            if(areas[i].getCurEmployees() > 0)
-                for(auto &x : employees)
-                    if(x.getCurrentArea() == &areas[i])
-                        return &x;
-    else
     {
-        float highestPercentage = 0;
-        area *highestPercentageArea = NULL;
-
-        for(auto &x : areas)
+        for(int i = areas.size() - 1; i >=0; i--)
         {
-            if(x.getCurEmployees() > 1)
+            if(areas[i].getCurEmployees() > 0)
             {
-                float currPercentage = float(x.getCurEmployees())/x.getMaxEmployees();
-                if(currPercentage > highestPercentage)
+                for(int j = 0; j < employees.size(); j++)
                 {
-                    highestPercentage = currPercentage;
-                    highestPercentageArea = &x;
+                    if(employees[j].getCurrentArea() == i)
+                    {
+                        return j;
+                    }
                 }
             }
         }
-        if(highestPercentageArea)
-            for(auto &x : employees)
-                if(x.getCurrentArea() == highestPercentageArea)
-                    return &x;
-        else
-            for(auto &x : employees)
-                if(x.getCurrentArea() == &areas[areas.size()-1]);
-                    return &x;
     }
-    return NULL;
+    else  //If all games have at least one employee
+    {
+        vector<int> multiEmp;
+        for(int i = 0; i < areas.size(); i++)
+        {
+            if(areas[i].getCurEmployees() > 1)
+            {
+                multiEmp.push_back(i);
+            }
+        }
+
+        float highestPercentage = 0;
+        int   highestPercentageArea = -1;
+
+        if(multiEmp.size() == 0)
+        {
+            highestPercentageArea = areas.size() - 1;
+        }
+        else
+        {
+            //Find game with highest percentage employeed
+            for(int i = 0; i < multiEmp.size(); i++)
+            {
+                float currPercentage = float(areas[multiEmp[i]].getCurEmployees())/areas[multiEmp[i]].getMaxEmployees();
+                if(currPercentage > highestPercentage)
+                {
+                    highestPercentage = currPercentage;
+                    highestPercentageArea = multiEmp[i];
+                }
+            }
+        }
+
+        //Pull from that game
+        for(int i = 0; i < employees.size(); i++)
+        {
+            if(employees[i].getCurrentArea() == highestPercentageArea)
+            {
+                return i;
+            }
+        }
+    }
+    return -1;
 }

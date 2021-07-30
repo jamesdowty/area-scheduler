@@ -10,7 +10,7 @@ employee::employee(string n, string i, int s, int e)
     start = s;
     end = e;
     status = OFF;
-    currentArea = NULL;
+    currentArea = -1;
     nextRest = 0;
 };
 
@@ -24,12 +24,12 @@ void employee::setStatus(eventCatagory x)
     status = x;
 };
 
-void employee::setCurrentArea(area *n)
+void employee::setCurrentArea(int n)
 {
     currentArea = n;
 };
 
-area* employee::getCurrentArea()
+int employee::getCurrentArea()
 {
     return currentArea;
 };

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-step::step(int t, STEP_TYPE st, string m, employee *ei, area *w, employee *eo, area *wf)
+step::step(int t, STEP_TYPE st, string m, int ei, int w, int eo, int wf)
 {
     time = t;
     stepType = st;
@@ -13,7 +13,7 @@ step::step(int t, STEP_TYPE st, string m, employee *ei, area *w, employee *eo, a
     whereFrom = wf;
 };
 
-step::step(int t, STEP_TYPE st, string m, employee *ei, area *w, employee *eo)
+step::step(int t, STEP_TYPE st, string m, int ei, int w, int eo)
 {
     time = t;
     stepType = st;
@@ -21,18 +21,18 @@ step::step(int t, STEP_TYPE st, string m, employee *ei, area *w, employee *eo)
     employeeIn = ei;
     where = w;
     employeeOut = eo;
-    whereFrom = NULL;
+    whereFrom = -1;
 };
 
-step::step(int t, STEP_TYPE st, string m, employee *ei, area *w)
+step::step(int t, STEP_TYPE st, string m, int ei, int w)
 {
     time = t;
     stepType = st;
     message = m;
     employeeIn = ei;
     where = w;
-    employeeOut = NULL;
-    whereFrom = NULL;
+    employeeOut = -1;
+    whereFrom = -1;
 };
 
 void step::printMessage()
