@@ -140,6 +140,7 @@ void department::importData(string areasPath, string breaksPath, string employee
     return;
 };
 
+
 void department::createSchedule()
 {
     currentTime = 0;
@@ -254,8 +255,53 @@ void department::updateEndTimes() //Removes employees if their shift is ending a
 
 };
 
+/*
+1. read in data
+2. Find all newly available employees
+3. Handle end times
+4. Ind handle violations, follow these steps:
+    a. Find all mandatory violations
+    b. If employees available, fill mandatory violations
+    c. If no employees available, do dfs to find best place to remove mandatory emp, KEEP CHAIN GOING UNTIL CURRENT TIME, DO NOT CHANGE currentTime!
+    a. Find all currently elligible violations (if employees are still available)
+    b. If available employees, do dfs to find most efficient paths and assign employee to that violation
+    c. If at the end of a violation, do another dfs to find the best time to remove employee, remove that
+       employee at the optimal time and set the current time back the the start time of that violation
+*/
 void department::updateViolations()
 {
+    int violationIndex = 0;
+    vector<int> eligibleViolatons;
+    vector<int> mandatoryViolations;
+    
+    //Finding eligible violations and pushing indices onto vector
+    while(violationIndex < violations.size() && violations[violationIndex].getMin() <= currentTime)
+    {
+        if(violations[violationIndex].getMax() < currentTime)
+            eligibleViolatons.push_back(violationIndex);
+        else if(violations[violationIndex].getMax() == currentTime)
+            mandatoryViolations.push_back(violationIndex);
+        
+        ++violationIndex;
+    }
+
+    while(mandatoryViolations.size() > 0)
+    {
+        if(availableEmployees.size() > 0)
+        {
+            //Take care of violation with an available employee
+        }
+        else
+        {
+            //DFS
+        }
+    }
+
+    while(availableEmployees.size() > 0 && eligibleViolatons.size() > 0)
+    {
+        //DFS
+    }
+
 
 };
 
