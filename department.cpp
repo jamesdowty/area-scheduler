@@ -140,7 +140,6 @@ void department::importData(string areasPath, string breaksPath, string employee
     return;
 };
 
-
 void department::createSchedule()
 {
     currentTime = 0;
@@ -268,7 +267,7 @@ void department::updateEndTimes() //Removes employees if their shift is ending a
     c. If at the end of a violation, do another dfs to find the best time to remove employee, remove that
        employee at the optimal time and set the current time back the the start time of that violation
 */
-void department::updateViolations()
+void department::updateViolations() 
 {
     int violationIndex = 0;
     vector<int> eligibleViolatons;
@@ -290,6 +289,10 @@ void department::updateViolations()
         if(availableEmployees.size() > 0)
         {
             //Take care of violation with an available employee
+            int currViolationIndex = mandatoryViolations.back();
+            mandatoryViolations.pop_back();
+
+            int currEmployeeIndex = violations[currViolation].getEmp();
         }
         else
         {
