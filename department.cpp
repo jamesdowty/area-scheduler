@@ -292,7 +292,25 @@ void department::updateViolations()
             int currViolationIndex = mandatoryViolations.back();
             mandatoryViolations.pop_back();
 
-            int currEmployeeIndex = violations[currViolation].getEmp();
+            int currEmployeeIndex = violations[currViolationIndex].getEmp();
+            employee &currEmployee = employees[currEmployeeIndex];
+
+            int nextEmployeeIndex = availableEmployees.front();
+            employee &nextEmployee = employees[nextEmployeeIndex];
+            availableEmployees.pop();
+
+            string newStep = "@" + to_string(currentTime) + " INSERT " + nextEmployee.getName() + " into " +
+                             areas[currEmployee.getCurrentArea()].getName() + " for " + currEmployee.getName() + "\'s " + breaks[currEmployee.getNextRest()].getName();
+            steps.push_back(step(currentTime, SWAP, newStep, nextEmployeeIndex, currEmployee.getCurrentArea(), currEmployeeIndex));
+
+            nextEmployee.setCurrentArea(currEmployee.getCurrentArea());
+            nextEmployee.setStatus(AREA);
+
+            currEmployee.setCurrentArea(-1);
+            currEmployee.setStatus(REST);
+            int nextStartTime = currentTime + breaks[currEmployee.getNextRest()].getDuration();
+            startTimes.push(event(REST, currEmployeeIndex, nextStartTime, nextStartTime));
+            currEmployee.incrementBreak();
         }
         else
         {
