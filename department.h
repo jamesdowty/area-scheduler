@@ -70,6 +70,7 @@ private:
     void      fillAreas();
     int       findNextEmployee();
     int       miscEmployees = 0;
+    int       dfs(int, int, int, unordered_map<int, bool>, int&, int&, int&, int);
 };
 
 #endif

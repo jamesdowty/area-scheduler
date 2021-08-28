@@ -30,3 +30,8 @@ bool event::operator>(const event &a) const
 {
     return min > a.getMin();
 };
+
+int  event::getBreakIndex()
+{
+    return breakIndex;
+}

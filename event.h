@@ -25,8 +25,9 @@ public:
     event(eventCatagory, int, int, int);
     short getMin() const;
     short getMax();
-    int getEmp();
-    bool operator>(const event &a) const;
+    int   getEmp();
+    bool  operator>(const event &a) const;
+    int   getBreakIndex();
 private:
     eventCatagory catagory;  //The type of event
     int breakIndex;          //The name of the event (if event=REST)

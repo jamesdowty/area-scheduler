@@ -314,13 +314,96 @@ void department::updateViolations()
         }
         else
         {
-            //DFS
+            //DFS Unknown Time
+            int finalStartTime = 0;
+            int finalViolationIndex = 0;
+            int maxBreakCount = 0;
+
+            for(int currentSearch : eligibleViolatons)
+            {
+                event &currViolation = violations[currentSearch];
+                int breakCount = 0;
+                int startTime = currViolation.getMin();
+                int totalDuration = 0;
+                unordered_map<int, bool> visited;
+
+                dfs(currentSearch, currViolation.getMin(), currViolation.getMax(), visited, startTime, breakCount, maxBreakCount, totalDuration);
+
+                if(startTime > finalStartTime)
+                {
+                    finalStartTime = startTime;
+                    finalViolationIndex = currentSearch;
+                }
+            }
+
+            //REMOVE EMPLOYEE FROM GAME TO REPLACE LEAVING EMPLOYEE
+            int currEmployeeIndex = violations[finalViolationIndex].getEmp();
+            employee &currEmployee = employees[currEmployeeIndex];
+/*
+            int nextEmployeeIndex = availableEmployees.front();
+            employee &nextEmployee = employees[nextEmployeeIndex];
+            availableEmployees.pop();
+
+            string newStep = "@" + to_string(finalStartTime) + " INSERT " + nextEmployee.getName() + " into " +
+                            areas[currEmployee.getCurrentArea()].getName() + " for " + currEmployee.getName() + "\'s " + breaks[currEmployee.getNextRest()].getName();
+            steps.push_back(step(currentTime, SWAP, newStep, nextEmployeeIndex, currEmployee.getCurrentArea(), currEmployeeIndex));
+
+            nextEmployee.setCurrentArea(currEmployee.getCurrentArea());
+            nextEmployee.setStatus(AREA);
+
+            currEmployee.setCurrentArea(-1);
+            currEmployee.setStatus(REST);
+            int nextStartTime = currentTime + breaks[currEmployee.getNextRest()].getDuration();
+            startTimes.push(event(REST, currEmployeeIndex, nextStartTime, nextStartTime));
+            currEmployee.incrementBreak();
+*/
         }
     }
 
     while(availableEmployees.size() > 0 && eligibleViolatons.size() > 0)
     {
-        //DFS
+        //DFS Current Time
+        int finalStartTime = 0;
+        int finalViolationIndex = 0;
+        int maxBreakCount = 0;
+
+        for(int currentSearch : eligibleViolatons)
+        {
+            event &currViolation = violations[currentSearch];
+            int breakCount = 0;
+            int startTime = currViolation.getMin();
+            int totalDuration = 0;
+            unordered_map<int, bool> visited;
+
+            dfs(currentSearch, currentTime, currentTime, visited, startTime, breakCount, maxBreakCount, totalDuration);
+
+            if(startTime > finalStartTime)
+            {
+                finalStartTime = startTime;
+                finalViolationIndex = currentSearch;
+            }
+        }
+
+        //REPLACE EMPLOYEE FROM VIOLATION INDEX
+        int currEmployeeIndex = violations[finalViolationIndex].getEmp();
+        employee &currEmployee = employees[currEmployeeIndex];
+
+        int nextEmployeeIndex = availableEmployees.front();
+        employee &nextEmployee = employees[nextEmployeeIndex];
+        availableEmployees.pop();
+
+        string newStep = "@" + to_string(currentTime) + " INSERT " + nextEmployee.getName() + " into " +
+                        areas[currEmployee.getCurrentArea()].getName() + " for " + currEmployee.getName() + "\'s " + breaks[currEmployee.getNextRest()].getName();
+        steps.push_back(step(currentTime, SWAP, newStep, nextEmployeeIndex, currEmployee.getCurrentArea(), currEmployeeIndex));
+
+        nextEmployee.setCurrentArea(currEmployee.getCurrentArea());
+        nextEmployee.setStatus(AREA);
+
+        currEmployee.setCurrentArea(-1);
+        currEmployee.setStatus(REST);
+        int nextStartTime = currentTime + breaks[currEmployee.getNextRest()].getDuration();
+        startTimes.push(event(REST, currEmployeeIndex, nextStartTime, nextStartTime));
+        currEmployee.incrementBreak();
     }
 
 
@@ -417,4 +500,31 @@ int department::findNextEmployee() //Find the next currently working employee to
         }
     }
     return -1;
+};
+
+void department::dfs(int searchIndex, int minTime, int maxTime, unordered_map<int, bool> visited, int &startTime, int &breakCount, int &maxCount, int totalDuration)
+{
+    visited[currentSearch] = true;
+    startTime = minTime-totalDuration;
+    breakCount++;
+    int currentBreakDuration = violations[currentSearch].getBreakIndex()].getDuration();
+    totalDuration += currentBreakDuration
+
+    minTime += breaks[violations[currentSearch].getBreakIndex()].getDuration();
+    maxTime += breaks[violations[currentSearch].getBreakIndex()].getDuration();
+
+    for(int i = 0; i < violations.size(); i++)
+    {
+        event &currViolation = violations[i];
+        if(!visited[i] && currViolation.getMax() >= minTime && currViolation.getMin() <= maxTime)
+        {
+            dfs(i, max(minTime, currViolation.getMin), min(maxTime, currViolation.getMax()), visited, startTime, breakCount, maxCount, totalDuration);
+        }
+    }
+    if(breakCount > maxCount)
+    {
+        maxCount = breakCount;
+        startTime = minTime;
+    }
+    return;
 }
